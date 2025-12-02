@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drywall Productivity Comparison (Muddskip)</title>
+    <title>Drywall Mud Efficiency Spectrum</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -18,7 +18,7 @@
             padding: 10px 15px;
             font-size: 14px;
             background: rgba(255, 255, 255, 0.95);
-            border: 2px solid #3b82f6; /* Blue border for emphasis */
+            border: 2px solid #3b82f6; 
             border-radius: 8px;
             pointer-events: none;
             opacity: 0;
@@ -32,11 +32,18 @@
             stroke-width: 4px;
             stroke-linecap: round;
         }
+        .regular-mud-line {
+            fill: none;
+            stroke: #fbbf24; /* Amber-400 */
+            stroke-width: 4px;
+            stroke-dasharray: 8 4; /* Dashed line for regular mud */
+            stroke-linecap: round;
+        }
         .muddskip-line {
             fill: none;
             stroke: #3b82f6; /* Blue-500 */
             stroke-width: 4px;
-            stroke-dasharray: 0; /* Solid line */
+            stroke-dasharray: 0;
             stroke-linecap: round;
         }
         .focus-circle {
@@ -48,15 +55,24 @@
             pointer-events: none;
             opacity: 0;
         }
-        .marginal-hotmud { stroke: #f87171; }
-        .marginal-muddskip { stroke: #93c5fd; }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
     <div class="max-w-5xl mx-auto bg-white p-6 md:p-10 rounded-xl shadow-2xl">
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">Drywall Productivity Comparison: Scale & Tool Compatibility</h1>
-        <p class="text-gray-600 mb-8">Comparing traditional fast-setting mud (Hotmud) with the continuous-process additive (Muddskip).</p>
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">The Drywall Efficiency Spectrum: Seasonal Impact</h1>
+        <p class="text-gray-600 mb-4">Productivity comparison across small (patching) to large (production) project scales.</p>
+
+        <!-- Toggle Button for Seasonal Comparison -->
+        <div class="mb-6 flex justify-center md:justify-start space-x-4">
+            <span class="text-gray-700 font-medium self-center">Conditions:</span>
+            <button id="toggle-normal" class="px-5 py-2 rounded-full text-white font-semibold shadow-md transition-all duration-300">
+                Optimal Drying
+            </button>
+            <button id="toggle-cool-wet" class="px-5 py-2 rounded-full font-semibold shadow-md transition-all duration-300">
+                Cool/Wet Conditions
+            </button>
+        </div>
 
         <div id="chart-container" class="w-full aspect-[16/9] relative">
             <svg id="productivity-chart" class="w-full h-full"></svg>
@@ -64,244 +80,347 @@
 
         <!-- Legend and Explanations -->
         <div class="mt-10">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4">Conclusion on Scaling:</h2>
-            <div class="flex flex-col md:flex-row gap-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Mud Performance Summary:</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- Hotmud Explanation -->
-                <div class="flex-1 p-5 bg-red-50 rounded-lg border-l-4 border-red-600 shadow-sm">
+                <div class="p-5 bg-red-50 rounded-lg border-l-4 border-red-600 shadow-sm">
                     <div class="flex items-center mb-2">
                         <div class="w-8 h-1 bg-red-600 rounded mr-3"></div>
-                        <p class="font-bold text-red-800">Hotmud (Fast-Setting Mud)</p>
+                        <p class="font-bold text-red-800">Hotmud (Fast-Setting)</p>
                     </div>
-                    <p class="text-sm text-red-700">
-                        **Severe Diminishing Returns:** Ideal only for small tasks (patching, corners). Beyond **30% project scale**, the need to rush, clean mixers, and dispose of setting mud completely negates the benefit, making it unviable for large-scale production or use in specialized continuous-flow tools.
-                    </p>
+                    <p class="text-sm text-red-700">Highest initial speed, but crippled by diminishing returns (mixing/cleanup) and **completely unsuited for production tools.**</p>
                 </div>
 
+                <!-- Regular Mud Explanation -->
+                <div class="p-5 bg-amber-50 rounded-lg border-l-4 border-amber-600 shadow-sm">
+                    <div class="flex items-center mb-2">
+                        <div class="w-8 h-1 bg-amber-600 dashed rounded mr-3" style="border-top: 3px dashed #fbbf24;"></div>
+                        <p class="font-bold text-amber-800">Regular Mud (Ready-Mix)</p>
+                    </div>
+                    <p class="text-sm text-amber-700" id="regular-mud-summary">
+                        **Optimal:** Linear but slow due to required drying time. 
+                        <span class="font-bold text-red-700">**Cool/Wet:** Severely stalled. Long, non-productive waiting periods due to moisture and low temperatures.</span>
+                    </p>
+                </div>
+                
                 <!-- Muddskip Explanation -->
-                <div class="flex-1 p-5 bg-blue-50 rounded-lg border-l-4 border-blue-600 shadow-sm">
+                <div class="p-5 bg-blue-50 rounded-lg border-l-4 border-blue-600 shadow-sm">
                     <div class="flex items-center mb-2">
                         <div class="w-8 h-1 bg-blue-600 rounded mr-3"></div>
                         <p class="font-bold text-blue-800">Muddskip (Wet-on-Wet Additive)</p>
                     </div>
-                    <p class="text-sm text-blue-700">
-                        **Sustained Linear Returns:** Eliminates the set-time constraint, allowing workers to maintain high productivity regardless of scale. **Critical advantage:** It enables the use of efficient, large-capacity production tools, maintaining a high marginal gain and reaching a much higher overall output ceiling.
-                    </p>
+                    <p class="text-sm text-blue-700">The optimal solution. Provides sustained, high-speed linear returns. The wet-on-wet process **negates most drying time constraints** and is effective in all seasons.</p>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            function drawChart() {
-                d3.select("#productivity-chart").selectAll("*").remove();
+        // Global variables for mode and state
+        let currentMode = 'NORMAL';
+        const maxProject = 100;
+        const maxProductivity = 100;
 
-                const container = document.getElementById('chart-container');
-                const width = container.clientWidth;
-                const height = container.clientHeight;
+        // --- Data Generation Functions ---
 
-                const margin = { top: 20, right: 30, bottom: 50, left: 60 };
-
-                const innerWidth = width - margin.left - margin.right;
-                const innerHeight = height - margin.top - margin.bottom;
-
-                const svg = d3.select("#productivity-chart")
-                    .attr("viewBox", `0 0 ${width} ${height}`)
-                    .append("g")
-                    .attr("transform", `translate(${margin.left},${margin.top})`);
-
-                const maxProject = 100;
-                const maxProductivity = 100;
-
-                // 1. Data Generation
-                const data = [];
-                for (let i = 0; i <= maxProject; i++) {
-                    const normalizedInput = i / maxProject;
-                    
-                    // --- Hotmud Model (Severe, early Diminishing Returns) ---
-                    // Aggressive exponential decay. Output stalls significantly early (around 30-40% scale)
-                    let hotmudOutput = maxProductivity * (1 - Math.exp(-9 * normalizedInput));
-                    hotmudOutput = Math.min(65, hotmudOutput); // Cap hotmud productivity ceiling at 65% visually
-                    
-                    // --- Muddskip Model (Near-Linear, higher overall ceiling due to tool compatibility) ---
-                    let muddskipOutput = maxProductivity * (0.1 + 0.9 * normalizedInput * (1 + 0.1 * normalizedInput));
-                    muddskipOutput = Math.min(maxProductivity + 10, muddskipOutput); // Allow it to slightly exceed 100% max input for visual 'production tool' effect
-
-                    data.push({
-                        projectSize: i,
-                        hotmud: hotmudOutput,
-                        muddskip: muddskipOutput
-                    });
-                }
+        function generateData(mode) {
+            const data = [];
+            for (let i = 0; i <= maxProject; i++) {
+                const normalizedInput = i / maxProject;
                 
-                // 2. Define Scales
-                const x = d3.scaleLinear()
-                    .domain([0, maxProject])
-                    .range([0, innerWidth]);
-
-                const y = d3.scaleLinear()
-                    .domain([0, maxProductivity + 10]) // Adjusted max Y-axis for Muddskip's higher ceiling
-                    .range([innerHeight, 0]);
-
-                // 3. Draw Axes
-                svg.append("g")
-                    .attr("transform", `translate(0,${innerHeight})`)
-                    .call(d3.axisBottom(x).ticks(5).tickFormat(d => d === 100 ? "Large Scale (Tools)" : d === 0 ? "Patching" : `${d}%`))
-                    .attr("class", "text-sm text-gray-500");
-
-                svg.append("g")
-                    .call(d3.axisLeft(y).ticks(6).tickFormat(d => `${d}%`))
-                    .attr("class", "text-sm text-gray-500");
-
-                // X-Axis Label
-                svg.append("text")
-                    .attr("text-anchor", "middle")
-                    .attr("x", innerWidth / 2)
-                    .attr("y", innerHeight + margin.bottom - 5)
-                    .attr("class", "font-medium text-gray-700 text-base")
-                    .text("Project Scale (Drywall Linear Footage)");
-
-                // Y-Axis Label
-                svg.append("text")
-                    .attr("text-anchor", "middle")
-                    .attr("transform", `translate(${-margin.left + 15},${innerHeight / 2}) rotate(-90)`)
-                    .attr("class", "font-medium text-gray-700 text-base")
-                    .text("Relative Productivity / Total Output (%)");
-
-                // --- Production Tool Threshold Line ---
-                const productionToolX = x(40); // Visually mark the point where Hotmud stalls and production tools become relevant
-                svg.append("line")
-                    .attr("x1", productionToolX)
-                    .attr("y1", y(maxProductivity + 10))
-                    .attr("x2", productionToolX)
-                    .attr("y2", innerHeight)
-                    .attr("stroke", "#6b7280")
-                    .attr("stroke-dasharray", "4 4")
-                    .attr("stroke-width", 1);
+                // 1. Hotmud Model (Same diminishing returns in all seasons)
+                let hotmudOutput = maxProductivity * (1 - Math.exp(-9 * normalizedInput));
+                hotmudOutput = Math.min(65, hotmudOutput);
                 
-                svg.append("text")
-                    .attr("x", productionToolX)
-                    .attr("y", y(maxProductivity + 10) - 5)
-                    .attr("text-anchor", "middle")
-                    .attr("class", "text-xs font-semibold text-gray-700 bg-white px-1 rounded-sm")
-                    .text("Production Tool Threshold");
+                // 3. Muddskip Model (Consistent linear returns - minimal drying dependency)
+                let muddskipOutput = maxProductivity * (0.1 + 0.9 * normalizedInput * (1 + 0.1 * normalizedInput));
+                muddskipOutput = Math.min(maxProductivity + 10, muddskipOutput);
 
+                let regularMudOutput;
 
-                // 4. Draw the Lines
-                const lineHotmud = d3.line()
-                    .x(d => x(d.projectSize))
-                    .y(d => y(d.hotmud))
-                    .curve(d3.curveMonotoneX);
+                if (mode === 'NORMAL') {
+                    // 2a. Regular Mud (Normal) - Linear, but low output ceiling
+                    regularMudOutput = maxProductivity * (0.1 + 0.65 * normalizedInput);
+                    regularMudOutput = Math.min(65, regularMudOutput);
 
-                const lineMuddskip = d3.line()
-                    .x(d => x(d.projectSize))
-                    .y(d => y(d.muddskip))
-                    .curve(d3.curveMonotoneX);
+                } else { // COOL/WET Mode
+                    // 2b. Regular Mud (Cool/Wet) - Stair-step function showing stalled time
+                    // We need 3 "steps" for 3 coats: Tape, Fill, Finish
+                    const workScale = 0.15; // Each coat takes 15% effort
+                    const coat1EffortEnd = workScale * maxProject;
+                    const coat2EffortStart = 30; // Stall 1 due to drying 
+                    const coat2EffortEnd = coat2EffortStart + workScale * maxProject;
+                    const coat3EffortStart = 60; // Stall 2 due to drying
+                    const coat3EffortEnd = coat3EffortStart + workScale * maxProject;
 
-                svg.append("path")
-                    .datum(data)
-                    .attr("class", "hotmud-line")
-                    .attr("d", lineHotmud);
-
-                svg.append("path")
-                    .datum(data)
-                    .attr("class", "muddskip-line")
-                    .attr("d", lineMuddskip);
-
-                // --- Interaction Setup ---
-
-                const tooltip = d3.select("body").append("div")
-                    .attr("class", "tooltip");
-                    
-                const focus = svg.append("g").style("opacity", 0);
-
-                // Focus circles
-                focus.append("circle").attr("class", "focus-circle hotmud-focus-circle").attr("r", 6).attr("fill", "#dc2626");
-                focus.append("circle").attr("class", "focus-circle muddskip-focus-circle").attr("r", 6).attr("fill", "#3b82f6");
-                
-                // Vertical focus line
-                focus.append("line").attr("class", "marginal-line focus-vline").attr("y1", 0).attr("y2", innerHeight).attr("stroke", "#94a3b8");
-
-                // Hover overlay area
-                svg.append("rect")
-                    .attr("width", innerWidth)
-                    .attr("height", innerHeight)
-                    .style("fill", "none")
-                    .style("pointer-events", "all")
-                    .on("mouseover", () => focus.style("opacity", 1))
-                    .on("mouseout", () => focus.style("opacity", 0) & tooltip.style("opacity", 0))
-                    .on("mousemove", mousemove);
-
-                function mousemove(event) {
-                    const [mx] = d3.pointer(event);
-                    const projectSize = x.invert(mx);
-                    
-                    const i = Math.round(projectSize);
-                    const d = data.find(p => p.projectSize === i);
-
-                    if (!d) return;
-
-                    // Update Focus Elements
-                    const hotmudY = y(d.hotmud);
-                    const muddskipY = y(d.muddskip);
-
-                    focus.select(".hotmud-focus-circle").attr("cx", x(d.projectSize)).attr("cy", hotmudY);
-                    focus.select(".muddskip-focus-circle").attr("cx", x(d.projectSize)).attr("cy", muddskipY);
-                    focus.select(".focus-vline").attr("x1", x(d.projectSize)).attr("x2", x(d.projectSize));
-                    
-                    // Calculate marginal gain (approximation)
-                    const prev_d = data.find(p => p.projectSize === i - 1);
-                    const hotmud_marginal = prev_d ? (d.hotmud - prev_d.hotmud).toFixed(2) : d.hotmud.toFixed(2);
-                    const muddskip_marginal = prev_d ? (d.muddskip - prev_d.muddskip).toFixed(2) : d.muddskip.toFixed(2);
-                    
-                    // Determine which material is more productive at this scale
-                    const muddskipWins = d.muddskip > d.hotmud;
-
-                    // Determine Marginal Gain Description
-                    let hotmudMarginalText = '';
-                    if (hotmud_marginal < 0.1) {
-                        hotmudMarginalText = '<span class="text-red-700 font-bold">~0.0% (Stalled)</span>';
-                    } else if (hotmud_marginal < 0.5) {
-                        hotmudMarginalText = `<span class="text-yellow-700 font-bold">${hotmud_marginal}% (Minimal)</span>`;
+                    if (i <= coat1EffortEnd) {
+                        // Taping (Work)
+                        regularMudOutput = (i / coat1EffortEnd) * 30;
+                    } else if (i <= coat2EffortStart) {
+                        // Stall 1 (Waiting to Dry)
+                        regularMudOutput = 30;
+                    } else if (i <= coat2EffortEnd) {
+                        // Filling (Work)
+                        regularMudOutput = 30 + ((i - coat2EffortStart) / (coat2EffortEnd - coat2EffortStart)) * 30;
+                    } else if (i <= coat3EffortStart) {
+                        // Stall 2 (Waiting to Dry)
+                        regularMudOutput = 60;
+                    } else if (i <= coat3EffortEnd) {
+                         // Finishing (Work)
+                        regularMudOutput = 60 + ((i - coat3EffortStart) / (coat3EffortEnd - coat3EffortStart)) * 30;
                     } else {
-                        hotmudMarginalText = `<span class="text-red-700 font-bold">${hotmud_marginal}%</span>`;
+                        // Stall 3 (Waiting to Dry/Final Sanding)
+                        regularMudOutput = 90;
                     }
 
-
-                    // Update Tooltip
-                    tooltip.html(`
-                        <p class="font-bold text-lg mb-1">Scale: ${d.projectSize.toFixed(0)}%</p>
-                        <hr class="my-1 border-gray-300">
-                        <div class="flex justify-between items-start text-red-800">
-                            <span>Hotmud Output:</span> 
-                            <span class="font-bold text-right">${d.hotmud.toFixed(1)}%</span>
-                        </div>
-                        <div class="flex justify-between items-start text-red-800 mb-2">
-                            <span>Marginal Gain:</span> 
-                            ${hotmudMarginalText}
-                        </div>
-                        <div class="flex justify-between items-start text-blue-800">
-                            <span>Muddskip Output:</span> 
-                            <span class="font-bold text-right">${d.muddskip.toFixed(1)}%</span>
-                        </div>
-                        <div class="flex justify-between items-start text-blue-800">
-                            <span>Marginal Gain:</span> 
-                            <span class="text-blue-700 font-bold">${muddskip_marginal}%</span>
-                        </div>
-                        <hr class="my-1 border-gray-300">
-                        <p class="mt-2 text-sm ${muddskipWins ? 'text-blue-600' : 'text-red-600'}">
-                            ${muddskipWins ? 'Muddskip is significantly more efficient at this scale.' : 'Hotmud has a slight speed advantage only for very small tasks.'}
-                        </p>
-                    `)
-                    .style("left", (event.pageX + 15) + "px")
-                    .style("top", (event.pageY - 120) + "px")
-                    .style("opacity", 1);
+                    // Ensure it never goes above 90 (due to slow drying)
+                    regularMudOutput = Math.min(90, regularMudOutput);
                 }
-            }
 
-            drawChart();
-            window.addEventListener('resize', drawChart);
+                data.push({
+                    projectSize: i,
+                    hotmud: hotmudOutput,
+                    regularMud: regularMudOutput,
+                    muddskip: muddskipOutput
+                });
+            }
+            return data;
+        }
+
+        // --- Chart Drawing Function ---
+
+        function drawChart(mode) {
+            d3.select("#productivity-chart").selectAll("*").remove();
+
+            const data = generateData(mode);
+
+            const container = document.getElementById('chart-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            const margin = { top: 20, right: 30, bottom: 50, left: 60 };
+            const innerWidth = width - margin.left - margin.right;
+            const innerHeight = height - margin.top - margin.bottom;
+
+            const svg = d3.select("#productivity-chart")
+                .attr("viewBox", `0 0 ${width} ${height}`)
+                .append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+            // 2. Define Scales
+            const x = d3.scaleLinear()
+                .domain([0, maxProject])
+                .range([0, innerWidth]);
+
+            const y = d3.scaleLinear()
+                .domain([0, maxProductivity + 10])
+                .range([innerHeight, 0]);
+
+            // 3. Draw Axes
+            svg.append("g")
+                .attr("transform", `translate(0,${innerHeight})`)
+                .call(d3.axisBottom(x).ticks(5).tickFormat(d => d === 100 ? "Large Scale" : d === 0 ? "Patching" : `${d}%`))
+                .attr("class", "text-sm text-gray-500");
+
+            svg.append("g")
+                .call(d3.axisLeft(y).ticks(6).tickFormat(d => `${d}%`))
+                .attr("class", "text-sm text-gray-500");
+
+            // X-Axis Label
+            svg.append("text")
+                .attr("text-anchor", "middle")
+                .attr("x", innerWidth / 2)
+                .attr("y", innerHeight + margin.bottom - 5)
+                .attr("class", "font-medium text-gray-700 text-base")
+                .text("Project Scale (Drywall Linear Footage / Effort)");
+
+            // Y-Axis Label
+            svg.append("text")
+                .attr("text-anchor", "middle")
+                .attr("transform", `translate(${-margin.left + 15},${innerHeight / 2}) rotate(-90)`)
+                .attr("class", "font-medium text-gray-700 text-base")
+                .text("Relative Productivity / Total Output (%)");
+
+            // 4. Define and Draw the Lines
+            const lineHotmud = d3.line()
+                .x(d => x(d.projectSize))
+                .y(d => y(d.hotmud))
+                .curve(d3.curveMonotoneX);
+
+            const lineRegularMud = d3.line()
+                .x(d => x(d.projectSize))
+                .y(d => y(d.regularMud))
+                // Use curveStepAfter for cool/wet mode to show discrete steps
+                .curve(mode === 'COOL/WET' ? d3.curveStepAfter : d3.curveMonotoneX); 
+
+            const lineMuddskip = d3.line()
+                .x(d => x(d.projectSize))
+                .y(d => y(d.muddskip))
+                .curve(d3.curveMonotoneX);
+
+            // Draw order matters: Muddskip last so it overlaps correctly
+            svg.append("path")
+                .datum(data)
+                .attr("class", "regular-mud-line")
+                .attr("d", lineRegularMud);
+
+            svg.append("path")
+                .datum(data)
+                .attr("class", "hotmud-line")
+                .attr("d", lineHotmud);
+
+            svg.append("path")
+                .datum(data)
+                .attr("class", "muddskip-line")
+                .attr("d", lineMuddskip);
+            
+            // --- Interaction Setup (Simplified from previous to avoid clutter) ---
+
+            const tooltip = d3.select("body").select(".tooltip");
+            if (tooltip.empty()) {
+                d3.select("body").append("div").attr("class", "tooltip");
+            }
+                
+            const focus = svg.append("g").style("opacity", 0);
+
+            // Focus circles (Red, Amber, Blue)
+            focus.append("circle").attr("class", "focus-circle hotmud-focus-circle").attr("r", 6).attr("fill", "#dc2626");
+            focus.append("circle").attr("class", "focus-circle regular-mud-focus-circle").attr("r", 6).attr("fill", "#fbbf24");
+            focus.append("circle").attr("class", "focus-circle muddskip-focus-circle").attr("r", 6).attr("fill", "#3b82f6");
+            
+            // Vertical focus line
+            focus.append("line").attr("class", "marginal-line focus-vline").attr("y1", 0).attr("y2", innerHeight).attr("stroke", "#94a3b8");
+
+            // Hover overlay area
+            svg.append("rect")
+                .attr("width", innerWidth)
+                .attr("height", innerHeight)
+                .style("fill", "none")
+                .style("pointer-events", "all")
+                .on("mouseover", () => focus.style("opacity", 1))
+                .on("mouseout", () => focus.style("opacity", 0) & tooltip.style("opacity", 0))
+                .on("mousemove", mousemove);
+
+            function mousemove(event) {
+                const [mx] = d3.pointer(event);
+                const projectSize = x.invert(mx);
+                
+                const i = Math.round(projectSize);
+                const d = data.find(p => p.projectSize === i);
+
+                if (!d) return;
+
+                // Update Focus Elements
+                focus.select(".hotmud-focus-circle").attr("cx", x(d.projectSize)).attr("cy", y(d.hotmud));
+                focus.select(".regular-mud-focus-circle").attr("cx", x(d.projectSize)).attr("cy", y(d.regularMud));
+                focus.select(".muddskip-focus-circle").attr("cx", x(d.projectSize)).attr("cy", y(d.muddskip));
+                focus.select(".focus-vline").attr("x1", x(d.projectSize)).attr("x2", x(d.projectSize));
+                
+                // Calculate marginal gain (approximation)
+                const prev_d = data.find(p => p.projectSize === i - 1);
+                const hotmud_marginal = prev_d ? (d.hotmud - prev_d.hotmud).toFixed(2) : d.hotmud.toFixed(2);
+                const regularMud_marginal = prev_d ? (d.regularMud - prev_d.regularMud).toFixed(2) : d.regularMud.toFixed(2);
+                const muddskip_marginal = prev_d ? (d.muddskip - prev_d.muddskip).toFixed(2) : d.muddskip.toFixed(2);
+                
+                // Marginal Gain text formatting
+                let hotmudMarginalText = hotmud_marginal < 0.1 ? '<span class="text-red-700 font-bold">~0.0% (Stalled)</span>' : `<span class="text-red-700 font-bold">${hotmud_marginal}%</span>`;
+
+                // Regular Mud Marginal Text in Cool/Wet Mode
+                let regularMudMarginalText;
+                if (mode === 'COOL/WET' && regularMud_marginal < 0.1 && i > 15 && i < 100) {
+                     regularMudMarginalText = '<span class="text-amber-700 font-bold">~0.0% (Waiting)</span>';
+                } else {
+                     regularMudMarginalText = `<span class="text-amber-700 font-bold">${regularMud_marginal}%</span>`;
+                }
+
+                // Determine winner
+                const maxOutput = Math.max(d.hotmud, d.regularMud, d.muddskip);
+                let winnerText = '';
+
+                if (d.muddskip === maxOutput) {
+                     winnerText = 'Muddskip is the highest-output product.';
+                } else if (d.hotmud === maxOutput) {
+                     winnerText = 'Hotmud is fastest only for this tiny patch scale.';
+                } else {
+                     winnerText = 'Regular Mud is competitive only at low speeds in optimal conditions.';
+                }
+
+
+                // Update Tooltip
+                tooltip.html(`
+                    <p class="font-bold text-lg mb-1">${mode === 'NORMAL' ? 'Optimal Drying' : 'Cool/Wet'} Scale: ${d.projectSize.toFixed(0)}%</p>
+                    <hr class="my-1 border-gray-300">
+                    
+                    <div class="flex justify-between items-start text-red-800">
+                        <span>Hotmud Output:</span> 
+                        <span class="font-bold text-right">${d.hotmud.toFixed(1)}%</span>
+                    </div>
+                    <div class="flex justify-between items-start text-red-800 mb-2">
+                        <span>Marginal Gain:</span> 
+                        ${hotmudMarginalText}
+                    </div>
+                    
+                    <div class="flex justify-between items-start text-amber-800">
+                        <span>Regular Mud Output:</span> 
+                        <span class="font-bold text-right">${d.regularMud.toFixed(1)}%</span>
+                    </div>
+                    <div class="flex justify-between items-start text-amber-800 mb-2">
+                        <span>Marginal Gain:</span> 
+                        ${regularMudMarginalText}
+                    </div>
+                    
+                    <div class="flex justify-between items-start text-blue-800">
+                        <span>Muddskip Output:</span> 
+                        <span class="font-bold text-right">${d.muddskip.toFixed(1)}%</span>
+                    </div>
+                    <div class="flex justify-between items-start text-blue-800">
+                        <span>Marginal Gain:</span> 
+                        <span class="text-blue-700 font-bold">${muddskip_marginal}%</span>
+                    </div>
+                    
+                    <hr class="my-1 border-gray-300">
+                    <p class="mt-2 text-sm text-gray-700 font-semibold">${winnerText}</p>
+                `)
+                .style("left", (event.pageX + 15) + "px")
+                .style("top", (event.pageY - 160) + "px")
+                .style("opacity", 1);
+            }
+        }
+
+        // --- UI & Event Handlers ---
+
+        function updateUI(mode) {
+            const normalButton = document.getElementById('toggle-normal');
+            const coolWetButton = document.getElementById('toggle-cool-wet');
+            
+            if (mode === 'NORMAL') {
+                normalButton.className = 'px-5 py-2 rounded-full text-white font-semibold shadow-md transition-all duration-300 bg-blue-600 hover:bg-blue-700';
+                coolWetButton.className = 'px-5 py-2 rounded-full text-gray-700 bg-gray-200 font-semibold shadow-md transition-all duration-300 hover:bg-gray-300';
+            } else {
+                coolWetButton.className = 'px-5 py-2 rounded-full text-white font-semibold shadow-md transition-all duration-300 bg-blue-600 hover:bg-blue-700';
+                normalButton.className = 'px-5 py-2 rounded-full text-gray-700 bg-gray-200 font-semibold shadow-md transition-all duration-300 hover:bg-gray-300';
+            }
+        }
+
+        document.getElementById('toggle-normal').addEventListener('click', () => {
+            currentMode = 'NORMAL';
+            updateUI(currentMode);
+            drawChart(currentMode);
         });
+
+        document.getElementById('toggle-cool-wet').addEventListener('click', () => {
+            currentMode = 'COOL/WET';
+            updateUI(currentMode);
+            drawChart(currentMode);
+        });
+
+        // Initial setup
+        window.onload = function() {
+            currentMode = 'NORMAL';
+            updateUI(currentMode);
+            drawChart(currentMode);
+            window.addEventListener('resize', () => drawChart(currentMode));
+        };
     </script>
 </body>
 </html>
